@@ -2,7 +2,7 @@
 
 A comprehensive Flask web application for automated GitHub repository backup and management. This tool provides a modern, intuitive web interface for scheduling and managing backups of your GitHub repositories with enterprise-grade features.
 
-![GitHub Backup Manager Dashboard](https://via.placeholder.com/800x400/24292e/ffffff?text=GitHub+Backup+Manager+Dashboard)
+![GitHub Backup Manager Dashboard](dashboard_screenshot.svg)
 
 ## 🚀 Features
 
