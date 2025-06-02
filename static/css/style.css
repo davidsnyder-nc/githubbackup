@@ -1,0 +1,578 @@
+:root {
+    /* GitHub Color Palette */
+    --gh-bg-canvas: #ffffff;
+    --gh-bg-overlay: #ffffff;
+    --gh-bg-inset: #f6f8fa;
+    --gh-bg-subtle: #f6f8fa;
+    --gh-border-default: #d1d9e0;
+    --gh-border-muted: #d8dee4;
+    --gh-fg-default: #1f2328;
+    --gh-fg-muted: #656d76;
+    --gh-fg-subtle: #6e7781;
+    --gh-accent-fg: #0969da;
+    --gh-accent-emphasis: #0969da;
+    --gh-success-fg: #1a7f37;
+    --gh-success-emphasis: #1f883d;
+    --gh-attention-fg: #9a6700;
+    --gh-attention-emphasis: #d1242f;
+    --gh-danger-fg: #d1242f;
+    --gh-danger-emphasis: #cf222e;
+    --gh-done-fg: #8250df;
+    --gh-sponsors-fg: #bf4b8a;
+    
+    /* Button colors */
+    --btn-primary-bg: #1f883d;
+    --btn-primary-border: rgba(31, 136, 61, 0.4);
+    --btn-primary-hover-bg: #1a7f37;
+    --btn-default-bg: #f6f8fa;
+    --btn-default-border: rgba(31, 35, 40, 0.15);
+    --btn-default-hover-bg: #f3f4f6;
+    
+    /* Shadow */
+    --shadow-small: 0 1px 0 rgba(31, 35, 40, 0.04);
+    --shadow-medium: 0 3px 6px rgba(140, 149, 159, 0.15);
+    --shadow-large: 0 8px 24px rgba(140, 149, 159, 0.2);
+}
+
+body {
+    background-color: var(--gh-bg-canvas);
+    color: var(--gh-fg-default);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* Custom Feature Icons */
+.feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+}
+
+.feature-icon.bg-primary {
+    background: linear-gradient(135deg, rgb(var(--primary-rgb)), rgb(var(--info-rgb))) !important;
+}
+
+.feature-icon.bg-success {
+    background: linear-gradient(135deg, rgb(var(--success-rgb)), hsl(120 60% 50%)) !important;
+}
+
+.feature-icon.bg-info {
+    background: linear-gradient(135deg, rgb(var(--info-rgb)), hsl(220 100% 60%)) !important;
+}
+
+.feature-icon.bg-warning {
+    background: linear-gradient(135deg, rgb(var(--warning-rgb)), hsl(35 100% 55%)) !important;
+}
+
+.feature-icon.bg-danger {
+    background: linear-gradient(135deg, rgb(var(--danger-rgb)), hsl(0 85% 60%)) !important;
+}
+
+.feature-icon.bg-light {
+    background: hsl(var(--light)) !important;
+    color: hsl(var(--text-muted)) !important;
+}
+
+/* GitHub-style Cards */
+.card {
+    background-color: var(--gh-bg-canvas);
+    border: 1px solid var(--gh-border-default);
+    border-radius: 12px;
+    box-shadow: var(--shadow-small);
+    transition: all 0.15s ease-in-out;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-medium);
+}
+
+.card-header {
+    background-color: var(--gh-bg-subtle);
+    border-bottom: 1px solid var(--gh-border-default);
+    border-radius: 12px 12px 0 0 !important;
+    padding: 16px 24px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* GitHub-style Navigation */
+.navbar {
+    background-color: var(--gh-bg-canvas) !important;
+    border-bottom: 1px solid var(--gh-border-default);
+    box-shadow: none;
+    padding: 16px 0;
+}
+
+.navbar-brand {
+    color: var(--gh-fg-default) !important;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.nav-link {
+    color: var(--gh-fg-default) !important;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 8px 16px !important;
+    border-radius: 8px;
+    transition: all 0.15s ease-in-out;
+}
+
+.nav-link:hover {
+    background-color: var(--gh-bg-subtle);
+    color: var(--gh-fg-default) !important;
+}
+
+.nav-link.active {
+    background-color: var(--gh-bg-inset);
+    color: var(--gh-fg-default) !important;
+    font-weight: 600;
+}
+
+/* Dropdown z-index fix */
+.dropdown-menu {
+    z-index: 1050 !important;
+    border: 1px solid var(--gh-border-default);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(140, 149, 159, 0.2);
+    background-color: var(--gh-bg-overlay);
+    padding: 8px 0;
+    position: absolute !important;
+}
+
+.table .dropdown {
+    position: static;
+}
+
+.table .dropdown-menu {
+    position: absolute !important;
+    z-index: 1055 !important;
+}
+
+.dropdown-item {
+    color: var(--gh-fg-default);
+    font-size: 14px;
+    padding: 6px 16px;
+    border: none;
+    background: none;
+}
+
+.dropdown-item:hover {
+    background-color: var(--gh-bg-subtle);
+    color: var(--gh-fg-default);
+}
+
+/* GitHub-style Buttons */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 5px 16px;
+    transition: all 0.15s ease-in-out;
+    border: 1px solid transparent;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.btn:hover {
+    transform: none;
+}
+
+.btn-primary {
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-border);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover-bg);
+    color: white;
+}
+
+.btn-success {
+    background-color: var(--gh-success-emphasis);
+    border-color: rgba(31, 136, 61, 0.4);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: var(--gh-success-fg);
+    color: white;
+}
+
+.btn-outline-secondary, .btn-outline-primary, .btn-outline-success, .btn-outline-warning {
+    background-color: var(--btn-default-bg);
+    border-color: var(--btn-default-border);
+    color: var(--gh-fg-default);
+}
+
+.btn-outline-secondary:hover, .btn-outline-primary:hover, .btn-outline-success:hover, .btn-outline-warning:hover {
+    background-color: var(--btn-default-hover-bg);
+    color: var(--gh-fg-default);
+    border-color: var(--gh-border-default);
+}
+
+/* GitHub-style Forms */
+.form-control, .form-select {
+    background-color: var(--gh-bg-canvas);
+    border: 1px solid var(--gh-border-default);
+    border-radius: 6px;
+    color: var(--gh-fg-default);
+    font-size: 14px;
+    padding: 5px 12px;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--gh-accent-fg);
+    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+    outline: none;
+}
+
+.input-group-text {
+    background-color: var(--gh-bg-subtle);
+    border: 1px solid var(--gh-border-default);
+    color: var(--gh-fg-muted);
+    font-size: 14px;
+}
+
+.form-label {
+    color: var(--gh-fg-default);
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.form-text {
+    color: var(--gh-fg-muted);
+    font-size: 12px;
+}
+
+/* GitHub-style Tables */
+.table {
+    color: var(--gh-fg-default);
+    font-size: 14px;
+}
+
+.table th {
+    background-color: var(--gh-bg-subtle);
+    border-bottom: 1px solid var(--gh-border-default);
+    border-top: 1px solid var(--gh-border-default);
+    font-weight: 600;
+    color: var(--gh-fg-default);
+    padding: 8px 16px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table th:first-child {
+    border-left: 1px solid var(--gh-border-default);
+    border-top-left-radius: 6px;
+}
+
+.table th:last-child {
+    border-right: 1px solid var(--gh-border-default);
+    border-top-right-radius: 6px;
+}
+
+.table td {
+    border-bottom: 1px solid var(--gh-border-default);
+    border-left: 1px solid var(--gh-border-default);
+    padding: 8px 16px;
+    vertical-align: middle;
+}
+
+.table td:last-child {
+    border-right: 1px solid var(--gh-border-default);
+}
+
+.table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 6px;
+}
+
+.table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 6px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--gh-bg-subtle);
+}
+
+.table-light {
+    background-color: var(--gh-bg-subtle);
+}
+
+/* GitHub-style Badges */
+.badge {
+    font-weight: 500;
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+}
+
+.badge.bg-success {
+    background-color: var(--gh-success-emphasis) !important;
+    color: white;
+}
+
+.badge.bg-primary {
+    background-color: var(--gh-accent-emphasis) !important;
+    color: white;
+}
+
+.badge.bg-secondary {
+    background-color: var(--gh-fg-muted) !important;
+    color: white;
+}
+
+.badge.bg-warning {
+    background-color: var(--gh-attention-emphasis) !important;
+    color: white;
+}
+
+.badge.bg-light {
+    background-color: var(--gh-bg-subtle) !important;
+    color: var(--gh-fg-default) !important;
+    border-color: var(--gh-border-default);
+}
+
+/* GitHub-style Alerts */
+.alert {
+    border-radius: 6px;
+    border: 1px solid transparent;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.alert-success {
+    background-color: #dafbe1;
+    border-color: #2da44e;
+    color: #1a7f37;
+}
+
+.alert-danger {
+    background-color: #ffebe9;
+    border-color: #cf222e;
+    color: #cf222e;
+}
+
+.alert-warning {
+    background-color: #fff8c5;
+    border-color: #d1242f;
+    color: #9a6700;
+}
+
+.alert-info {
+    background-color: #ddf4ff;
+    border-color: #0969da;
+    color: #0969da;
+}
+
+/* GitHub-style Footer */
+.footer {
+    background-color: var(--gh-bg-canvas);
+    border-top: 1px solid var(--gh-border-default);
+    margin-top: auto;
+    color: var(--gh-fg-muted);
+}
+
+/* General Layout Improvements */
+.container-fluid {
+    background-color: var(--gh-bg-inset);
+    min-height: calc(100vh - 200px);
+}
+
+.display-6 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--gh-fg-default);
+}
+
+.text-muted {
+    color: var(--gh-fg-muted) !important;
+}
+
+.text-primary {
+    color: var(--gh-accent-fg) !important;
+}
+
+.text-success {
+    color: var(--gh-success-fg) !important;
+}
+
+.text-danger {
+    color: var(--gh-danger-fg) !important;
+}
+
+.text-warning {
+    color: var(--gh-attention-fg) !important;
+}
+
+/* GitHub-style feature icons */
+.feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+    border-radius: 6px;
+    background-color: var(--gh-bg-subtle) !important;
+    color: var(--gh-fg-default) !important;
+}
+
+.feature-icon.bg-primary {
+    background-color: var(--gh-accent-emphasis) !important;
+    color: white !important;
+}
+
+.feature-icon.bg-success {
+    background-color: var(--gh-success-emphasis) !important;
+    color: white !important;
+}
+
+.feature-icon.bg-info {
+    background-color: var(--gh-accent-emphasis) !important;
+    color: white !important;
+}
+
+.feature-icon.bg-warning {
+    background-color: var(--gh-attention-emphasis) !important;
+    color: white !important;
+}
+
+/* Loading Animation */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+.loading {
+    animation: pulse 2s infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .feature-icon {
+        width: 3rem;
+        height: 3rem;
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.75rem;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: hsl(var(--light));
+}
+
+::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--text-muted));
+}
+
+/* Focus Management */
+.btn:focus,
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Status Indicators */
+.status-online {
+    color: rgb(var(--success-rgb));
+}
+
+.status-offline {
+    color: rgb(var(--danger-rgb));
+}
+
+.status-pending {
+    color: rgb(var(--warning-rgb));
+}
+
+/* Code blocks */
+code {
+    background-color: hsl(var(--light));
+    color: hsl(var(--text));
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875em;
+}
+
+pre {
+    background-color: hsl(var(--light));
+    border: 1px solid hsl(var(--border));
+    border-radius: 0.5rem;
+    padding: 1rem;
+    overflow-x: auto;
+}
+
+/* Utility Classes */
+.text-gradient {
+    background: linear-gradient(135deg, rgb(var(--primary-rgb)), rgb(var(--info-rgb)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(var(--shadow), 0.075) !important;
+}
+
+.border-0 {
+    border: 0 !important;
+}
