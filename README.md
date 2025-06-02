@@ -2,7 +2,7 @@
 
 A comprehensive Flask web application for automated GitHub repository backup and management. This tool provides a modern, intuitive web interface for scheduling and managing backups of your GitHub repositories with enterprise-grade features.
 
-![GitHub Backup Manager Dashboard](dashboard_screenshot.png)
+![GitHub Backup Manager Dashboard](dashboard_screenshot.svg)
 
 ## 🚀 Features
 
@@ -39,7 +39,6 @@ A comprehensive Flask web application for automated GitHub repository backup and
 ## 📋 Requirements
 
 - Python 3.8 or higher
-- PostgreSQL database
 - GitHub Personal Access Token
 - Modern web browser
 
@@ -68,28 +67,19 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Database Setup
+### 3. Environment Variables
 
-Create a PostgreSQL database and set the connection string:
-
-```bash
-export DATABASE_URL="postgresql://username:password@localhost/githubbackup"
-```
-
-### 4. Environment Variables
-
-Set the required environment variables:
+Set the required environment variable:
 
 ```bash
 export SESSION_SECRET="your-secret-key-here"
-export DATABASE_URL="postgresql://username:password@localhost/githubbackup"
 ```
 
-### 5. Initialize Database
+### 4. Initialize Database
 
-The application will automatically create the necessary database tables on first run.
+The application will automatically create a SQLite database and all necessary tables on first run. No additional database setup is required.
 
-### 6. Run the Application
+### 5. Run the Application
 
 ```bash
 python main.py
@@ -176,7 +166,7 @@ githubbackup/
 │   └── js/
 ├── templates/          # Jinja2 HTML templates
 ├── backups/           # Default backup storage directory
-└── instance/          # SQLite database (if not using PostgreSQL)
+└── instance/          # SQLite database files
 ```
 
 ## 🔧 Dependencies
@@ -187,7 +177,7 @@ githubbackup/
 - `Gunicorn` - WSGI HTTP Server
 
 ### Database & Scheduling
-- `psycopg2-binary` - PostgreSQL adapter
+- `SQLAlchemy` - Database ORM (uses SQLite by default)
 - `APScheduler` - Advanced Python Scheduler
 
 ### External Services
