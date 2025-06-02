@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Repositories - GitHub Backup Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 mb-0">
+                <i class="fas fa-code-branch me-2 text-primary"></i>
+                Repositories
+            </h1>
+            <p class="text-muted">Manage which repositories to backup</p>
+        </div>
+        <div class="col-auto">
+            <form method="POST" action="{{ url_for('sync_repositories') }}" class="d-inline">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sync me-1"></i>Sync from GitHub
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Repositories List -->
+    <div class="row">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">
+                            <i class="fab fa-github me-2 text-primary"></i>
+                            Your Repositories
+                        </h5>
+                        <span class="badge bg-primary">{{ repositories|length }} repositories</span>
+                    </div>
+                    
+                    <!-- Bulk Actions -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-success btn-sm" id="select-all-btn">
+                                <i class="fas fa-check-square me-1"></i>Enable All
+                            </button>
+                            <button type="button" class="btn btn-outline-warning btn-sm" id="deselect-all-btn">
+                                <i class="fas fa-square me-1"></i>Disable All
+                            </button>
+                        </div>
+                        
+                        <div class="text-muted small">
+                            <span id="enabled-count">{{ repositories|selectattr('enabled')|list|length }}</span> of {{ repositories|length }} enabled
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if repositories %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="5%">Status</th>
+                                        <th width="30%">Repository</th>
+                                        <th width="15%">Last Backup</th>
+                                        <th width="10%">Private</th>
+                                        <th width="30%">Description</th>
+                                        <th width="10%">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for repo in repositories %}
+                                    <tr>
+                                        <td>
+                                            {% if repo.enabled %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i>
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-pause"></i>
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fab fa-github me-2 text-muted"></i>
+                                                <div>
+                                                    <div class="fw-medium">{{ repo.name }}</div>
+                                                    <small class="text-muted">{{ repo.full_name }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if repo.last_backup %}
+                                                <small class="text-muted">
+                                                    {{ repo.last_backup.strftime('%m/%d/%Y %H:%M') }}
+                                                </small>
+                                            {% else %}
+                                                <small class="text-muted">Never</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if repo.clone_url.startswith('https://github.com/') %}
+                                                <span class="badge bg-light text-dark">Public</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Private</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ repo.full_name.split('/')[-1] }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <form method="POST" action="{{ url_for('toggle_repository', repo_id=repo.id) }}" class="d-inline">
+                                                {% if repo.enabled %}
+                                                    <button type="submit" class="btn btn-outline-warning btn-sm me-2" 
+                                                            title="Disable backup">
+                                                        <i class="fas fa-pause me-1"></i>Disable
+                                                    </button>
+                                                {% else %}
+                                                    <button type="submit" class="btn btn-outline-success btn-sm me-2" 
+                                                            title="Enable backup">
+                                                        <i class="fas fa-play me-1"></i>Enable
+                                                    </button>
+                                                {% endif %}
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="feature-icon bg-light text-muted rounded-3 mb-3 mx-auto">
+                                <i class="fab fa-github"></i>
+                            </div>
+                            <h6 class="text-muted">No repositories found</h6>
+                            <p class="text-muted mb-3">Sync your repositories from GitHub to get started</p>
+                            <form method="POST" action="{{ url_for('sync_repositories') }}">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sync me-1"></i>Sync Repositories
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Section -->
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Repository Management
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Backup Status:</h6>
+                            <ul class="list-unstyled">
+                                <li><span class="badge bg-success me-2"><i class="fas fa-check"></i></span>Enabled for backup</li>
+                                <li><span class="badge bg-secondary me-2"><i class="fas fa-pause"></i></span>Backup disabled</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Actions:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-sync text-primary me-2"></i>Sync to fetch latest repositories</li>
+                                <li><i class="fas fa-play text-success me-2"></i>Enable repository backup</li>
+                                <li><i class="fas fa-pause text-warning me-2"></i>Disable repository backup</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllBtn = document.getElementById('select-all-btn');
+    const deselectAllBtn = document.getElementById('deselect-all-btn');
+    const enabledCountSpan = document.getElementById('enabled-count');
+
+    // Bulk enable all repositories
+    selectAllBtn.addEventListener('click', function() {
+        // Show loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Enabling...';
+        this.disabled = true;
+        
+        fetch('{{ url_for("bulk_toggle_repositories") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'enable_all'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+                this.innerHTML = '<i class="fas fa-check-square me-1"></i>Enable All';
+                this.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred while updating repositories', 'error');
+            this.innerHTML = '<i class="fas fa-check-square me-1"></i>Enable All';
+            this.disabled = false;
+        });
+    });
+
+    // Bulk disable all repositories
+    deselectAllBtn.addEventListener('click', function() {
+        // Show loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Disabling...';
+        this.disabled = true;
+        
+        fetch('{{ url_for("bulk_toggle_repositories") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'disable_all'
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+                this.innerHTML = '<i class="fas fa-square me-1"></i>Disable All';
+                this.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred while updating repositories', 'error');
+            this.innerHTML = '<i class="fas fa-square me-1"></i>Disable All';
+            this.disabled = false;
+        });
+    });
+
+    // Update enabled count when individual toggles happen
+    document.querySelectorAll('form[action*="toggle-repository"]').forEach(form => {
+        form.addEventListener('submit', function() {
+            // Show loading state
+            const button = this.querySelector('button');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Updating...';
+            button.disabled = true;
+            
+            // The form will submit and page will reload, so no need to reset
+        });
+    });
+});
+</script>
+{% endblock %}
