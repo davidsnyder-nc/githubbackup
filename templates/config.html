@@ -1,0 +1,631 @@
+{% extends "base.html" %}
+
+{% block title %}Configuration - GitHub Backup Manager{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-6 mb-0">
+                <i class="fas fa-cog me-2 text-primary"></i>
+                Configuration
+            </h1>
+            <p class="text-muted">Configure your GitHub token and backup settings</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title mb-0">
+                        <i class="fab fa-github me-2"></i>
+                        Backup Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <!-- GitHub Token -->
+                        <div class="mb-4">
+                            <label for="github_token" class="form-label">
+                                <i class="fas fa-key me-1"></i>
+                                GitHub Personal Access Token
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fab fa-github"></i>
+                                </span>
+                                <input type="password" class="form-control" id="github_token" name="github_token" 
+                                       value="{% if config %}{{ config.github_token }}{% endif %}" 
+                                       placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('github_token')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Generate a personal access token from 
+                                <a href="https://github.com/settings/tokens" target="_blank" class="text-decoration-none">
+                                    GitHub Settings <i class="fas fa-external-link-alt ms-1"></i>
+                                </a>
+                                with <code>repo</code> scope.
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Backup Path -->
+                        <div class="mb-4">
+                            <label for="backup_path" class="form-label">
+                                <i class="fas fa-folder me-1"></i>
+                                Backup Directory
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-folder-open"></i>
+                                </span>
+                                <input type="text" class="form-control" id="backup_path" name="backup_path" 
+                                       value="{% if config %}{{ config.backup_path }}{% else %}./backups{% endif %}" required readonly>
+                                <button class="btn btn-outline-secondary" type="button" id="browse_folder_btn">
+                                    <i class="fas fa-edit me-1"></i>Edit
+                                </button>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Local directory where backup ZIP files will be stored. Use relative paths like <code>./backups</code> or absolute paths.
+                            </div>
+                        </div>
+
+                        <!-- Max Backups -->
+                        <div class="mb-4">
+                            <label for="max_backups" class="form-label">
+                                <i class="fas fa-archive me-1"></i>
+                                Maximum Backup Files per Repository
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-hashtag"></i>
+                                </span>
+                                <input type="number" class="form-control" id="max_backups" name="max_backups" 
+                                       value="{% if config %}{{ config.max_backups }}{% else %}5{% endif %}" 
+                                       min="1" max="50" required>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Older backup files will be automatically deleted when this limit is exceeded.
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Schedule Settings -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="schedule_enabled" name="schedule_enabled" 
+                                       {% if config and config.schedule_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="schedule_enabled">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Enable Automatic Backup Schedule
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                When enabled, backups will run automatically according to the schedule below.
+                            </div>
+                        </div>
+
+                        <!-- Auto-sync Settings -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="auto_sync_enabled" name="auto_sync_enabled" 
+                                       {% if config and config.auto_sync_enabled %}checked{% endif %}>
+                                <label class="form-check-label" for="auto_sync_enabled">
+                                    <i class="fas fa-sync me-1"></i>
+                                    Automatically Include New Repositories
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                When enabled, the system will check for new repositories before each backup and automatically include them.
+                            </div>
+                        </div>
+
+                        <!-- Schedule Settings -->
+                        <div class="mb-4" id="schedule_settings">
+                            <!-- Frequency Selection -->
+                            <div class="mb-3">
+                                <label for="schedule_frequency" class="form-label">
+                                    <i class="fas fa-calendar-alt me-1"></i>
+                                    Backup Frequency
+                                </label>
+                                <select class="form-select" id="schedule_frequency" name="schedule_frequency">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="custom">Custom (Advanced)</option>
+                                </select>
+                            </div>
+
+                            <!-- Time Selection -->
+                            <div class="row mb-3" id="time_settings">
+                                <div class="col-md-6">
+                                    <label for="schedule_time" class="form-label">
+                                        <i class="fas fa-clock me-1"></i>
+                                        Backup Time
+                                    </label>
+                                    <input type="time" class="form-control" id="schedule_time" name="schedule_time" value="02:00">
+                                </div>
+                                <div class="col-md-6" id="ampm_toggle">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="time_format_24h" checked>
+                                        <label class="form-check-label" for="time_format_24h">
+                                            Use 24-hour format
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Weekly Day Selection -->
+                            <div class="mb-3" id="weekly_settings" style="display: none;">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-week me-1"></i>
+                                    Day of Week
+                                </label>
+                                <div class="row">
+                                    <div class="col">
+                                        <select class="form-select" id="weekly_day" name="weekly_day">
+                                            <option value="0">Sunday</option>
+                                            <option value="1" selected>Monday</option>
+                                            <option value="2">Tuesday</option>
+                                            <option value="3">Wednesday</option>
+                                            <option value="4">Thursday</option>
+                                            <option value="5">Friday</option>
+                                            <option value="6">Saturday</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Monthly Day Selection -->
+                            <div class="mb-3" id="monthly_settings" style="display: none;">
+                                <label class="form-label">
+                                    <i class="fas fa-calendar-day me-1"></i>
+                                    Day of Month
+                                </label>
+                                <div class="row">
+                                    <div class="col">
+                                        <select class="form-select" id="monthly_day" name="monthly_day">
+                                            <option value="1" selected>1st</option>
+                                            <option value="15">15th</option>
+                                            <option value="last">Last day of month</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Custom Cron Expression -->
+                            <div class="mb-3" id="custom_settings" style="display: none;">
+                                <label for="schedule_cron" class="form-label">
+                                    <i class="fas fa-terminal me-1"></i>
+                                    Custom Cron Expression
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-code"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="schedule_cron" name="schedule_cron" 
+                                           value="{% if config %}{{ config.schedule_cron }}{% else %}0 2 * * *{% endif %}" 
+                                           placeholder="0 2 * * *">
+                                </div>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Format: minute hour day month day_of_week
+                                    <br>
+                                    <small class="text-muted">
+                                        Examples: <code>0 */6 * * *</code> (every 6 hours), 
+                                        <code>0 14 * * 1-5</code> (weekdays at 2 PM)
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Schedule Preview -->
+                            <div class="alert alert-info border-0" id="schedule_preview">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="schedule_description">Backups will run daily at 2:00 AM</span>
+                            </div>
+
+                            <!-- Hidden field for actual cron expression -->
+                            <input type="hidden" id="final_cron" name="final_cron" value="0 2 * * *">
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Save Configuration
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        GitHub Token Setup Help
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Required Permissions:</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i><code>repo</code> - Access repositories</li>
+                                <li><i class="fas fa-check text-success me-2"></i><code>user</code> - Read user profile</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Steps to Create Token:</h6>
+                            <ol class="small">
+                                <li>Go to GitHub Settings → Developer settings</li>
+                                <li>Click "Personal access tokens"</li>
+                                <li>Generate new token with required scopes</li>
+                                <li>Copy and paste the token above</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="card border-danger shadow-sm mt-4">
+                <div class="card-header bg-danger text-white border-0">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Danger Zone
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger border-0">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-trash-alt me-2"></i>Purge All Data
+                        </h6>
+                        <p class="mb-3">
+                            This will permanently delete <strong>all</strong> configuration settings, repository data, 
+                            backup files, and job history. This action cannot be undone.
+                        </p>
+                        <p class="mb-0">
+                            <strong>Warning:</strong> All backup ZIP files will be permanently deleted from the server.
+                        </p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('purge_system') }}" id="purge-form">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="confirm_purge" required>
+                                    <label class="form-check-label" for="confirm_purge">
+                                        I understand this will permanently delete all data and cannot be reversed
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <button type="submit" class="btn btn-danger" id="purge_btn" disabled>
+                                    <i class="fas fa-trash-alt me-1"></i>Purge All Data
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        field.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// Schedule management functions
+function updateScheduleVisibility() {
+    const frequency = document.getElementById('schedule_frequency').value;
+    const weeklySettings = document.getElementById('weekly_settings');
+    const monthlySettings = document.getElementById('monthly_settings');
+    const customSettings = document.getElementById('custom_settings');
+    const timeSettings = document.getElementById('time_settings');
+    
+    // Hide all specific settings first
+    weeklySettings.style.display = 'none';
+    monthlySettings.style.display = 'none';
+    customSettings.style.display = 'none';
+    timeSettings.style.display = 'block';
+    
+    // Show relevant settings based on frequency
+    switch(frequency) {
+        case 'weekly':
+            weeklySettings.style.display = 'block';
+            break;
+        case 'monthly':
+            monthlySettings.style.display = 'block';
+            break;
+        case 'custom':
+            customSettings.style.display = 'block';
+            timeSettings.style.display = 'none';
+            break;
+    }
+    
+    updateSchedulePreview();
+}
+
+function updateSchedulePreview() {
+    const frequency = document.getElementById('schedule_frequency').value;
+    const time = document.getElementById('schedule_time').value;
+    const description = document.getElementById('schedule_description');
+    let cronExpression = '';
+    let previewText = '';
+    
+    if (frequency === 'custom') {
+        cronExpression = document.getElementById('schedule_cron').value;
+        previewText = 'Custom schedule: ' + cronExpression;
+    } else {
+        const [hour, minute] = time.split(':');
+        const hour12 = parseInt(hour);
+        const ampm = hour12 >= 12 ? 'PM' : 'AM';
+        const displayHour = hour12 === 0 ? 12 : hour12 > 12 ? hour12 - 12 : hour12;
+        const timeStr = `${displayHour}:${minute} ${ampm}`;
+        
+        switch(frequency) {
+            case 'daily':
+                cronExpression = `${minute} ${hour} * * *`;
+                previewText = `Backups will run daily at ${timeStr}`;
+                break;
+            case 'weekly':
+                const dayName = document.getElementById('weekly_day').selectedOptions[0].text;
+                const dayValue = document.getElementById('weekly_day').value;
+                cronExpression = `${minute} ${hour} * * ${dayValue}`;
+                previewText = `Backups will run weekly on ${dayName} at ${timeStr}`;
+                break;
+            case 'monthly':
+                const monthlyDay = document.getElementById('monthly_day').value;
+                if (monthlyDay === 'last') {
+                    cronExpression = `${minute} ${hour} 28-31 * *`;
+                    previewText = `Backups will run monthly on the last day at ${timeStr}`;
+                } else {
+                    cronExpression = `${minute} ${hour} ${monthlyDay} * *`;
+                    const dayText = monthlyDay === '1' ? '1st' : monthlyDay === '15' ? '15th' : monthlyDay + 'th';
+                    previewText = `Backups will run monthly on the ${dayText} at ${timeStr}`;
+                }
+                break;
+        }
+    }
+    
+    description.textContent = previewText;
+    document.getElementById('final_cron').value = cronExpression;
+}
+
+// Toggle schedule settings visibility
+document.getElementById('schedule_enabled').addEventListener('change', function() {
+    const scheduleSettings = document.getElementById('schedule_settings');
+    
+    if (this.checked) {
+        scheduleSettings.style.opacity = '1';
+        scheduleSettings.style.pointerEvents = 'auto';
+    } else {
+        scheduleSettings.style.opacity = '0.5';
+        scheduleSettings.style.pointerEvents = 'none';
+    }
+});
+
+// Parse existing cron expression and set form values
+function parseCronExpression(cronExpr) {
+    if (!cronExpr) return;
+    
+    const parts = cronExpr.split(' ');
+    if (parts.length !== 5) return;
+    
+    const [minute, hour, day, month, dayOfWeek] = parts;
+    
+    // Set time
+    const timeInput = document.getElementById('schedule_time');
+    timeInput.value = `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+    
+    // Determine frequency
+    const frequencySelect = document.getElementById('schedule_frequency');
+    
+    if (day === '*' && month === '*' && dayOfWeek === '*') {
+        frequencySelect.value = 'daily';
+    } else if (day === '*' && month === '*' && dayOfWeek !== '*') {
+        frequencySelect.value = 'weekly';
+        document.getElementById('weekly_day').value = dayOfWeek;
+    } else if (month === '*' && dayOfWeek === '*' && day !== '*') {
+        frequencySelect.value = 'monthly';
+        if (day.includes('-')) {
+            document.getElementById('monthly_day').value = 'last';
+        } else {
+            document.getElementById('monthly_day').value = day;
+        }
+    } else {
+        frequencySelect.value = 'custom';
+        document.getElementById('schedule_cron').value = cronExpr;
+    }
+}
+
+// Initialize everything when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    const scheduleEnabled = document.getElementById('schedule_enabled');
+    const scheduleSettings = document.getElementById('schedule_settings');
+    
+    // Set initial visibility
+    if (!scheduleEnabled.checked) {
+        scheduleSettings.style.opacity = '0.5';
+        scheduleSettings.style.pointerEvents = 'none';
+    }
+    
+    // Parse existing cron expression if present
+    const existingCron = document.getElementById('schedule_cron').value;
+    if (existingCron && existingCron !== '0 2 * * *') {
+        parseCronExpression(existingCron);
+    }
+    
+    // Set up event listeners
+    document.getElementById('schedule_frequency').addEventListener('change', updateScheduleVisibility);
+    document.getElementById('schedule_time').addEventListener('change', updateSchedulePreview);
+    document.getElementById('weekly_day').addEventListener('change', updateSchedulePreview);
+    document.getElementById('monthly_day').addEventListener('change', updateSchedulePreview);
+    document.getElementById('schedule_cron').addEventListener('input', updateSchedulePreview);
+    
+    // Initial setup
+    updateScheduleVisibility();
+    
+    // Initialize folder picker
+    initializeFolderPicker();
+    
+    // Add quick folder suggestions
+    addQuickFolderSuggestions();
+    
+    // Enable/disable purge button based on checkbox
+    document.getElementById('confirm_purge').addEventListener('change', function() {
+        const purgeBtn = document.getElementById('purge_btn');
+        purgeBtn.disabled = !this.checked;
+        
+        if (this.checked) {
+            purgeBtn.classList.add('btn-danger');
+            purgeBtn.classList.remove('btn-outline-danger');
+        } else {
+            purgeBtn.classList.add('btn-outline-danger');
+            purgeBtn.classList.remove('btn-danger');
+        }
+    });
+});
+
+// Enhanced folder path input functionality
+function initializeFolderPicker() {
+    const browseBtn = document.getElementById('browse_folder_btn');
+    const backupPathInput = document.getElementById('backup_path');
+    
+    browseBtn.addEventListener('click', function() {
+        // Toggle between read-only and editable
+        if (backupPathInput.readOnly) {
+            backupPathInput.readOnly = false;
+            backupPathInput.focus();
+            backupPathInput.select();
+            browseBtn.innerHTML = '<i class="fas fa-check me-1"></i>Done';
+            browseBtn.className = 'btn btn-success';
+        } else {
+            backupPathInput.readOnly = true;
+            browseBtn.innerHTML = '<i class="fas fa-edit me-1"></i>Edit';
+            browseBtn.className = 'btn btn-outline-secondary';
+            
+            // Validate path format
+            validateBackupPath(backupPathInput.value);
+        }
+    });
+    
+    // Enter key to finish editing
+    backupPathInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            browseBtn.click();
+        }
+    });
+}
+
+function validateBackupPath(path) {
+    const backupPathInput = document.getElementById('backup_path');
+    const helpText = backupPathInput.parentNode.nextElementSibling;
+    
+    // Basic path validation
+    if (!path || path.trim() === '') {
+        helpText.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-1"></i>Please enter a backup directory path.';
+        return false;
+    }
+    
+    // Check for valid path characters (basic check)
+    const invalidChars = /[<>:"|?*]/;
+    if (invalidChars.test(path)) {
+        helpText.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-1"></i>Path contains invalid characters. Avoid: &lt; &gt; : " | ? *';
+        return false;
+    }
+    
+    // Success message
+    helpText.innerHTML = '<i class="fas fa-check text-success me-1"></i>Backup directory path looks valid.';
+    return true;
+}
+
+function showManualPathInput() {
+    const backupPathInput = document.getElementById('backup_path');
+    backupPathInput.readOnly = false;
+    backupPathInput.placeholder = 'Enter backup directory path (e.g., ./backups)';
+    backupPathInput.focus();
+    
+    // Show a help message
+    const helpText = backupPathInput.parentNode.nextElementSibling;
+    helpText.innerHTML = `
+        <i class="fas fa-info-circle me-1"></i>
+        Enter the full path where backup files should be stored. Examples:
+        <br><small class="text-muted">
+        • <code>./backups</code> (relative to app directory)
+        • <code>/Users/username/Documents/GitHubBackups</code> (macOS)
+        • <code>C:\\Users\\username\\Documents\\GitHubBackups</code> (Windows)
+        • <code>/home/username/github-backups</code> (Linux)
+        </small>
+    `;
+}
+
+// Quick folder suggestions
+function addQuickFolderSuggestions() {
+    const backupPathInput = document.getElementById('backup_path');
+    const container = backupPathInput.parentNode.parentNode;
+    
+    const suggestionsDiv = document.createElement('div');
+    suggestionsDiv.className = 'mt-2';
+    suggestionsDiv.innerHTML = `
+        <small class="text-muted">Quick suggestions:</small>
+        <div class="btn-group-sm mt-1" role="group">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-1" onclick="setBackupPath('./backups')">
+                <i class="fas fa-folder me-1"></i>./backups
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm me-1" onclick="setBackupPath('./github-backups')">
+                <i class="fas fa-folder me-1"></i>./github-backups
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" onclick="showManualPathInput()">
+                <i class="fas fa-edit me-1"></i>Custom Path
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(suggestionsDiv);
+}
+
+function setBackupPath(path) {
+    const backupPathInput = document.getElementById('backup_path');
+    backupPathInput.value = path;
+    backupPathInput.readOnly = true;
+}
+
+// Update form submission to use the generated cron expression
+document.querySelector('form').addEventListener('submit', function() {
+    const scheduleEnabled = document.getElementById('schedule_enabled').checked;
+    if (scheduleEnabled) {
+        const finalCron = document.getElementById('final_cron').value;
+        document.getElementById('schedule_cron').value = finalCron;
+    }
+});
+</script>
+{% endblock %}
